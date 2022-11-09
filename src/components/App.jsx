@@ -52,7 +52,7 @@ class App extends Component {
     });
   };
 
-  getvisibleContacts = () => {
+  getVisibleContacts = () => {
     const { filter, contacts } = this.state;
     const normalizedFilter = filter.toLowerCase();
 
@@ -61,9 +61,25 @@ class App extends Component {
     );
   };
 
+  componentDidMount() {
+    if (!localStorage.contacts) {
+      localStorage.setItem('contacts', JSON.stringify(this.state.contacts));
+    } else {
+      const contactsFromLocal = JSON.parse(localStorage.getItem('contacts'));
+
+      this.setState({
+        contacts: contactsFromLocal,
+      });
+    }
+  }
+
+  componentDidUpdate() {
+    localStorage.setItem('contacts', JSON.stringify(this.state.contacts));
+  }
+
   render() {
     const { filter } = this.state;
-    const visibleContacts = this.getvisibleContacts();
+    const visibleContacts = this.getVisibleContacts();
 
     return (
       <div className={css.container}>
@@ -72,10 +88,15 @@ class App extends Component {
 
         <h2 className={css.title}>Contacts</h2>
         <Filter value={filter} onChange={this.filterHandler} />
-        <ContactList
-          contacts={visibleContacts}
-          onDelete={this.onDeleteContact}
-        />
+
+        {visibleContacts.length > 0 ? (
+          <ContactList
+            contacts={visibleContacts}
+            onDelete={this.onDeleteContact}
+          />
+        ) : (
+          <p>You can add contacts</p>
+        )}
       </div>
     );
   }
